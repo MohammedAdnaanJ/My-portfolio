@@ -36,10 +36,12 @@ export default function HomePage() {
       <Section id="experience" labelledBy="experience-title" className="border-t">
         <SectionHeading
           id="experience-title"
-          eyebrow="Experience"
           title="Where I've worked"
           action={
-            <Link href="/experience" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
+            <Link
+              href="/experience"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+            >
               Full details
               <ArrowRight className="size-4" />
             </Link>

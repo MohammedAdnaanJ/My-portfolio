@@ -28,7 +28,6 @@ export function Section({
 
 export function SectionHeading({
   id,
-  eyebrow,
   title,
   description,
   as: Tag = "h2",
@@ -36,7 +35,6 @@ export function SectionHeading({
   action,
 }: {
   id?: string;
-  eyebrow: string;
   title: string;
   description?: string;
   as?: "h1" | "h2";
@@ -44,9 +42,8 @@ export function SectionHeading({
   action?: ReactNode;
 }) {
   return (
-    <div className={cn("mb-12 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between", className)}>
+    <div className={cn("mb-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between", className)}>
       <div className="max-w-2xl">
-        <p className="mb-3 font-mono text-xs tracking-wider text-primary uppercase">{eyebrow}</p>
         <Tag
           id={id}
           className={cn(
@@ -56,7 +53,9 @@ export function SectionHeading({
         >
           {title}
         </Tag>
-        {description && <p className="mt-4 text-base leading-relaxed text-pretty text-muted-foreground">{description}</p>}
+        {description && (
+          <p className="mt-4 text-base leading-relaxed text-pretty text-muted-foreground">{description}</p>
+        )}
       </div>
       {action && <div className="shrink-0">{action}</div>}
     </div>

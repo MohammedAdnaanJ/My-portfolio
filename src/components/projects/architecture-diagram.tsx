@@ -7,11 +7,11 @@ export function ArchitectureDiagram({ architecture }: { architecture: ProjectArc
   const { layers } = architecture;
   return (
     <figure className="rounded-2xl border bg-card/60 p-4 sm:p-6">
-      <div className="bg-grid rounded-xl p-2 sm:p-4">
+      <div className="p-2 sm:p-4">
         {layers.map((layer, i) => (
           <div key={layer.label}>
             <div>
-              <p className="mb-2 font-mono text-[0.68rem] tracking-wider text-muted-foreground uppercase">
+              <p className="mb-2 text-xs font-medium text-muted-foreground">
                 {String(i + 1).padStart(2, "0")} · {layer.label}
               </p>
               <ul

@@ -60,8 +60,6 @@
   --border: oklch(0.2 0.012 270 / 10%);
   --input: oklch(0.2 0.012 270 / 14%);
   --ring: oklch(0.5 0.19 275 / 60%);
-  --grid-line: oklch(0.2 0.012 270 / 5%);
-  --glow: oklch(0.6 0.17 275 / 12%);
 }
 
 /* Dark theme (default) */
@@ -86,8 +84,6 @@
   --border: oklch(1 0 0 / 8%);
   --input: oklch(1 0 0 / 12%);
   --ring: oklch(0.74 0.13 275 / 60%);
-  --grid-line: oklch(1 0 0 / 4%);
-  --glow: oklch(0.6 0.16 275 / 16%);
 }
 
 @layer base {
@@ -118,20 +114,4 @@
   html {
     scroll-behavior: auto;
   }
-}
-
-@utility bg-grid {
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: 48px 48px;
-}
-
-@utility mask-fade-b {
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%);
-}
-
-@utility glass {
-  background: color-mix(in oklch, var(--card) 72%, transparent);
-  backdrop-filter: blur(12px) saturate(140%);
 }

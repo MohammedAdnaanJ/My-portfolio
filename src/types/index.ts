@@ -114,8 +114,6 @@ export interface Project {
 
 export interface SkillGroup {
   title: string;
-  description: string;
-  icon: "code" | "server" | "layout" | "database" | "workflow" | "building" | "terminal" | "wrench";
   skills: string[];
 }
 

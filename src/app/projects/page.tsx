@@ -15,9 +15,8 @@ export default function ProjectsPage() {
       <SectionHeading
         as="h1"
         id="projects-page-title"
-        eyebrow="Projects"
-        title="Engineering case studies"
-        description="Each project covers the problem, the architecture, the decisions behind it and what I learned. Planned work is labelled as planned."
+        title="Projects"
+        description="Write-ups of things I've built: the problem, how it works, the decisions I made and what I learned. Projects I haven't built yet are marked as planned."
       />
       <ProjectsList />
     </Section>

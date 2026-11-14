@@ -10,19 +10,18 @@ import { StatusBadge } from "./status-badge";
 
 export function FeaturedProjectCard({ project }: { project: Project }) {
   return (
-    <Card className="group relative overflow-hidden transition-colors hover:border-primary/30">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-24 -right-24 size-72 rounded-full bg-[radial-gradient(closest-side,var(--glow),transparent)]"
-      />
+    <Card className="group relative overflow-hidden transition-colors hover:border-foreground/20">
       <div className="grid gap-10 p-6 sm:p-8 lg:grid-cols-[1.25fr_1fr] lg:p-10">
         <div className="flex flex-col">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-xs tracking-wider text-primary uppercase">Featured · {project.category}</span>
+            <span className="text-sm text-muted-foreground">{project.category}</span>
             <StatusBadge status={project.status} />
           </div>
           <h3 className="mt-4 text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-            <Link href={`/projects/${project.slug}`} className="after:absolute after:inset-0 focus-visible:outline-none">
+            <Link
+              href={`/projects/${project.slug}`}
+              className="after:absolute after:inset-0 focus-visible:outline-none"
+            >
               {project.shortTitle}
             </Link>
           </h3>
@@ -55,7 +54,7 @@ export function FeaturedProjectCard({ project }: { project: Project }) {
         </div>
         {project.pipeline && (
           <div className="rounded-xl border bg-muted/40 p-4 sm:p-5">
-            <p className="mb-4 font-mono text-[0.68rem] tracking-wider text-muted-foreground uppercase">System overview</p>
+            <p className="mb-4 text-xs font-medium text-muted-foreground">System overview</p>
             <PipelineStrip steps={project.pipeline} />
           </div>
         )}
@@ -66,9 +65,9 @@ export function FeaturedProjectCard({ project }: { project: Project }) {
 
 export function ProjectCard({ project }: { project: Project }) {
   return (
-    <Card className="group relative flex h-full flex-col p-6 transition-colors hover:border-primary/30">
+    <Card className="group relative flex h-full flex-col p-6 transition-colors hover:border-foreground/20">
       <div className="flex items-center justify-between gap-3">
-        <span className="font-mono text-xs tracking-wider text-muted-foreground uppercase">{project.category}</span>
+        <span className="text-sm text-muted-foreground">{project.category}</span>
         <StatusBadge status={project.status} />
       </div>
       <h3 className="mt-4 text-lg font-semibold tracking-tight">

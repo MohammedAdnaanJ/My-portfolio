@@ -16,9 +16,8 @@ export default function ExperiencePage() {
       <SectionHeading
         as="h1"
         id="experience-page-title"
-        eyebrow="Experience"
-        title="Hands-on engineering experience"
-        description="Backend development, enterprise data archival, database operations, distributed data technologies and Linux automation."
+        title="Experience"
+        description="One internship so far, at Datagen Systems in Chennai."
       />
       <ExperienceTimeline items={experience} />
     </Section>

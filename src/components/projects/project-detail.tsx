@@ -45,8 +45,7 @@ export function ProjectDetail({ project, prev, next }: { project: Project; prev?
 
   return (
     <article>
-      <header className="relative overflow-hidden border-b">
-        <div aria-hidden className="bg-grid mask-fade-b pointer-events-none absolute inset-0 -z-10" />
+      <header className="border-b">
         <Container className="pt-12 pb-14 sm:pt-16">
           <Link
             href="/projects"
@@ -56,11 +55,13 @@ export function ProjectDetail({ project, prev, next }: { project: Project; prev?
             All projects
           </Link>
           <div className="mt-8 flex flex-wrap items-center gap-2">
-            <span className="font-mono text-xs tracking-wider text-primary uppercase">{project.category}</span>
+            <span className="text-sm text-muted-foreground">{project.category}</span>
             <StatusBadge status={project.status} />
             {project.period && <span className="text-xs text-muted-foreground">{project.period}</span>}
           </div>
-          <h1 className="mt-4 max-w-4xl text-3xl font-semibold tracking-tight text-balance sm:text-5xl">{project.title}</h1>
+          <h1 className="mt-4 max-w-4xl text-3xl font-semibold tracking-tight text-balance sm:text-5xl">
+            {project.title}
+          </h1>
           <p className="mt-6 max-w-3xl text-lg leading-relaxed text-pretty text-muted-foreground">{project.summary}</p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             {project.repoUrl ? (
@@ -106,7 +107,7 @@ export function ProjectDetail({ project, prev, next }: { project: Project; prev?
       <Container className="grid gap-12 py-14 lg:grid-cols-[200px_1fr] lg:gap-16">
         <nav aria-label="On this page" className="hidden lg:block">
           <div className="sticky top-24">
-            <p className="mb-3 font-mono text-xs tracking-wider text-muted-foreground uppercase">On this page</p>
+            <p className="mb-3 text-sm font-medium">On this page</p>
             <ul className="space-y-2 border-l text-sm">
               {toc.map((item) => (
                 <li key={item.id}>
@@ -211,15 +212,11 @@ export function ProjectDetail({ project, prev, next }: { project: Project; prev?
                       </h3>
                       <dl className="mt-4 grid gap-4 text-sm leading-relaxed md:grid-cols-2">
                         <div>
-                          <dt className="mb-1 font-mono text-[0.68rem] tracking-wider text-muted-foreground uppercase">
-                            Challenge
-                          </dt>
+                          <dt className="mb-1 text-xs font-medium text-foreground">Challenge</dt>
                           <dd className="text-muted-foreground">{c.context}</dd>
                         </div>
                         <div>
-                          <dt className="mb-1 font-mono text-[0.68rem] tracking-wider text-muted-foreground uppercase">
-                            Approach
-                          </dt>
+                          <dt className="mb-1 text-xs font-medium text-foreground">Approach</dt>
                           <dd className="text-foreground/85">{c.approach}</dd>
                         </div>
                       </dl>
@@ -245,7 +242,10 @@ export function ProjectDetail({ project, prev, next }: { project: Project; prev?
 
           <nav aria-label="More projects" className="grid gap-4 border-t pt-10 sm:grid-cols-2">
             {prev ? (
-              <Link href={`/projects/${prev.slug}`} className="group rounded-xl border p-4 transition-colors hover:border-primary/30">
+              <Link
+                href={`/projects/${prev.slug}`}
+                className="group rounded-xl border p-4 transition-colors hover:border-primary/30"
+              >
                 <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                   <ArrowLeft className="size-3" /> Previous
                 </span>

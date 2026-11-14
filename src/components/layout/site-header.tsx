@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Download, Menu } from "lucide-react";
+import { motion } from "motion/react";
 import { navItems, profile } from "@/data/profile";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -19,7 +20,7 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="glass sticky top-0 z-40 border-b">
+    <header className="sticky top-0 z-40 border-b bg-background/95">
       <a
         href="#main"
         className="sr-only rounded-md bg-primary px-3 py-2 text-primary-foreground focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50"
@@ -44,10 +45,17 @@ export function SiteHeader() {
                     href={item.href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "rounded-md px-3 py-2 text-sm transition-colors",
+                      "relative isolate rounded-md px-3 py-2 text-sm transition-colors",
                       active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
                     )}
                   >
+                    {active && (
+                      <motion.span
+                        layoutId="nav-active"
+                        className="absolute inset-0 -z-10 rounded-md bg-muted"
+                        transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                      />
+                    )}
                     {item.label}
                   </Link>
                 </li>
@@ -69,16 +77,12 @@ export function SiteHeader() {
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger
-              render={
-                <Button variant="ghost" size="icon" className="size-9 md:hidden" aria-label="Open menu" />
-              }
+              render={<Button variant="ghost" size="icon" className="size-9 md:hidden" aria-label="Open menu" />}
             >
               <Menu className="size-5" />
             </SheetTrigger>
             <SheetContent side="right" className="w-72 p-6">
-              <SheetTitle className="font-mono text-xs tracking-wider text-muted-foreground uppercase">
-                Navigation
-              </SheetTitle>
+              <SheetTitle className="text-sm font-medium text-muted-foreground">Navigation</SheetTitle>
               <nav aria-label="Mobile" className="mt-2">
                 <ul className="flex flex-col gap-1">
                   {[{ label: "Home", href: "/" }, ...navItems].map((item) => {
@@ -91,7 +95,9 @@ export function SiteHeader() {
                           aria-current={active ? "page" : undefined}
                           className={cn(
                             "block rounded-lg px-3 py-2.5 text-base transition-colors",
-                            active ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                            active
+                              ? "bg-muted text-foreground"
+                              : "text-muted-foreground hover:bg-muted hover:text-foreground",
                           )}
                         >
                           {item.label}

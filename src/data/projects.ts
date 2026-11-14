@@ -15,20 +15,20 @@ import type { Project } from "@/types";
 export const projects: Project[] = [
   {
     slug: "iceberg-rest-catalog",
-    title: "Production-Oriented Custom Apache Iceberg REST Catalog & Metadata Lifecycle Engine",
+    title: "Custom Apache Iceberg REST Catalog and metadata lifecycle engine",
     shortTitle: "Custom Apache Iceberg REST Catalog",
     status: "prototype",
     featured: true,
     category: "Data Platform · Backend",
     summary:
-      "A custom Apache Iceberg REST Catalog with a metadata lifecycle engine — snapshot lineage, time travel, rollback, reconciliation and quarantine-first metadata expiration — built with FastAPI and PostgreSQL and exercised end-to-end with Apache Spark.",
+      "An Iceberg REST Catalog I wrote from scratch in FastAPI, backed by PostgreSQL. It tracks snapshot lineage, supports time travel and rollback, and cleans up old metadata safely. I tested it end to end with Apache Spark.",
     overview: [
-      "A from-scratch implementation of an Apache Iceberg REST Catalog built with FastAPI, using PostgreSQL 16 as a metadata index and exercised end-to-end with Apache Spark 3.5. I built it at Datagen Systems as an internal proof of concept for the Lakex.ai data archival platform, to validate the approach before the development phase.",
-      "Beyond serving catalog requests, the service includes a metadata lifecycle engine: it tracks every metadata JSON file and the snapshot lineage of each table, supports snapshot history, time travel and rollback using Iceberg semantics, reconciles its index against the metadata on storage, and expires old metadata through a dry-run, quarantine-first cleanup process.",
+      "I built this at Datagen Systems as an internal proof of concept for the Lakex.ai data archival platform. The idea was to test the approach before the development phase started. It's a FastAPI service that implements the Iceberg REST Catalog spec, uses PostgreSQL 16 as an index over table metadata, and works with Apache Spark 3.5.",
+      "Serving catalog requests was only half of it. The service also records every metadata JSON file and each table's snapshot lineage, so you can look through history, time travel and roll back. It can reconcile its index against what's actually on storage, and it removes old metadata with a dry run first and a quarantine step before anything is deleted.",
     ],
     problem: [
-      "Iceberg tables depend on a catalog to map a table identifier to its current metadata file and to coordinate commits. Off-the-shelf catalogs work, but they hide how that coordination happens — and they give limited visibility into how table metadata accumulates over time.",
-      "Every commit writes a new metadata JSON file and snapshots pile up. Cleaning that up carelessly can break time travel or leave a table pointing at files that no longer exist. The goal was to build a catalog from the API level up, understand Iceberg's metadata model in depth, and design lifecycle management that is observable, repeatable and safe by default.",
+      "An Iceberg table needs a catalog to know which metadata file is current and to coordinate commits. Existing catalogs do this well, but you never see how, and they don't show much about how metadata builds up over time. I wanted to understand it properly by building one.",
+      "There's also a cleanup problem. Every commit writes a new metadata JSON file, and snapshots keep piling up. Delete the wrong file and time travel breaks, or the table points at something that no longer exists. So the second goal was cleanup you can see, repeat, and trust not to destroy anything.",
     ],
     architecture: {
       layers: [
@@ -73,13 +73,13 @@ export const projects: Project[] = [
         },
       ],
       flow: [
-        "A client or engine calls the REST catalog — for example to create a namespace, load a table or commit a change.",
+        "A client or engine calls the REST catalog, for example to create a namespace, load a table or commit a change.",
         "The catalog resolves the organization, namespace and table in the PostgreSQL metadata index.",
         "It reads or writes the table's Iceberg metadata JSON in the warehouse and records the new metadata location and snapshot lineage in the index.",
         "Spark uses the metadata returned by the catalog to read and write manifests and data files in the warehouse.",
       ],
       footnote:
-        "Spark accesses data files in the warehouse directly; the catalog owns table identity, the current metadata pointer and lifecycle operations.",
+        "Spark reads and writes data files in the warehouse directly. The catalog only owns table identity, the current metadata pointer and lifecycle operations.",
     },
     pipeline: [
       { label: "Client", tech: "REST / HTTP" },
@@ -112,7 +112,7 @@ export const projects: Project[] = [
       },
       {
         title: "Metadata JSON tracking",
-        description: "Every metadata file a table produces is recorded, so its history is fully traceable.",
+        description: "Every metadata file a table produces is recorded, so you can trace its whole history.",
       },
       {
         title: "Snapshot lineage",
@@ -147,70 +147,70 @@ export const projects: Project[] = [
       {
         title: "Follow the Iceberg REST specification",
         description:
-          "Implementing the published REST catalog contract means Spark works with its stock Iceberg integration — no custom engine plugin to build or maintain.",
+          "Because the catalog follows the published REST spec, Spark works with its normal Iceberg integration. I didn't have to write or maintain a custom plugin.",
       },
       {
         title: "PostgreSQL as an index over Iceberg metadata",
         description:
-          "Iceberg's metadata files stay the source of table state; PostgreSQL indexes them for fast lookups and lineage queries. Because the index is derived, it can be reconciled against storage.",
+          "The Iceberg metadata files are the source of truth. PostgreSQL only indexes them for fast lookups and lineage queries, so the index can always be checked against storage and corrected.",
       },
       {
         title: "Idempotent writes",
         description:
-          "Persistence is keyed on stable identifiers, so a retried request or a repeated reconciliation run converges on the same state instead of creating duplicates.",
+          "Writes are keyed on stable IDs. If a request is retried or reconciliation runs twice, you end up with the same state, not duplicates.",
       },
       {
-        title: "Destructive operations are safe by default",
+        title: "Nothing is deleted straight away",
         description:
-          "Metadata expiration starts with a dry run and moves files to quarantine before deletion, so a mistake is recoverable rather than permanent.",
+          "Expiration starts with a dry run, and files go to quarantine before they're deleted. If something is removed by mistake, it can still be recovered.",
       },
     ],
     challenges: [
       {
         title: "Keeping the index consistent with storage",
         context:
-          "The PostgreSQL index and the metadata files on storage can drift — for example after an interrupted operation or a change made outside the catalog.",
+          "The PostgreSQL index and the metadata files on storage can drift apart, for example after an interrupted operation or a change made outside the catalog.",
         approach:
-          "Built a reconciliation process that compares the index with the metadata actually present and brings them back in line, combined with idempotent persistence so it is safe to run repeatedly.",
+          "I wrote a reconciliation step that compares the index with the metadata that's really there and fixes the differences. Since writes are idempotent, it's safe to run as often as needed.",
       },
       {
         title: "Rollback without losing history",
         context:
           "Rolling a table back must change what readers see without erasing the snapshots that came after the rollback target.",
         approach:
-          "Used Iceberg's snapshot semantics so rollback moves the table's current snapshot while the full lineage remains recorded and inspectable.",
+          "Rollback uses Iceberg's snapshot semantics: it moves the table's current snapshot, and the full lineage stays recorded so you can still inspect it.",
       },
       {
         title: "Expiring metadata safely",
         context:
           "Old metadata files and snapshots must eventually be cleaned up, but removing something still referenced breaks time travel or the table itself.",
         approach:
-          "Expiration runs as dry-run first, reporting exactly what would be removed. Approved removals go to quarantine before final deletion, giving a recovery window.",
+          "Expiration always runs as a dry run first and reports exactly what it would remove. Approved files go to quarantine before final deletion, which leaves time to recover them.",
       },
       {
         title: "Compatibility with Spark",
         context:
-          "Spark's Iceberg integration exercises the catalog API in its own way and expects responses that match the specification exactly.",
+          "Spark's Iceberg integration calls the catalog in its own way and expects responses that match the spec exactly.",
         approach:
-          "Validated the catalog end-to-end from Spark — creating namespaces and tables, inserting data, and reading snapshot history back through the catalog.",
+          "I tested it from Spark end to end: creating namespaces and tables, inserting data, and reading snapshot history back through the catalog.",
       },
       {
         title: "Multi-organization isolation",
         context: "Several organizations sharing one catalog service must not see or affect each other's namespaces and tables.",
-        approach: "Scoped catalog objects by organization in the data model so every lookup resolves within a single organization.",
+        approach: "Every catalog object belongs to an organization in the data model, so each lookup only sees one organization's data.",
       },
     ],
     learnings: [
-      "How Iceberg actually works underneath: metadata JSON, manifest lists, manifests, snapshots and how a commit moves a table from one state to the next.",
-      "Designing REST APIs against an external specification, where compatibility with existing clients matters more than API taste.",
-      "Why idempotency and reconciliation are essential in any system that stores state in two places.",
-      "Building destructive maintenance operations with dry-run and quarantine stages so they are safe to automate.",
-      "Running Spark and PostgreSQL together on Linux and debugging problems that cross service boundaries.",
+      "How Iceberg works underneath: metadata JSON, manifest lists, manifests, snapshots, and what a commit actually changes.",
+      "When you build against someone else's spec, staying compatible matters more than your own API preferences.",
+      "If a system stores state in two places, you need idempotent writes and a way to reconcile them.",
+      "Anything that deletes data needs a dry run and a way back before it's safe to automate.",
+      "Running Spark and PostgreSQL together on Linux, and debugging problems that span more than one service.",
     ],
     scopeNote:
-      "Internal proof of concept built at Datagen Systems ahead of the development phase, and tested in a Linux environment. It was designed with production concerns in mind, but no production deployment or performance benchmarks are claimed.",
+      "An internal proof of concept built at Datagen Systems before the development phase, tested on Linux. I designed it with production in mind, but it hasn't run in production and I haven't benchmarked it.",
     repoUrl: null,
-    sourceNote: "Internal company codebase — source not publicly available",
+    sourceNote: "Internal company code, so the source isn't public",
     todos: ["Review the decisions/challenges wording so it matches your implementation exactly."],
   },
   {
@@ -221,14 +221,14 @@ export const projects: Project[] = [
     featured: false,
     category: "Enterprise Data · Databases",
     summary:
-      "Backend APIs and archival automation for Datagen Archive Manager — 12+ FastAPI endpoints, AF / CSV / Parquet conversion workflows with IBM Optim and PostgreSQL FDW, and SQL work across Oracle, MySQL and PostgreSQL.",
+      "Backend APIs and archival automation for Datagen Archive Manager: 12+ FastAPI endpoints, AF, CSV and Parquet conversion jobs using IBM Optim and PostgreSQL FDW, and SQL work on Oracle, MySQL and PostgreSQL.",
     overview: [
-      "Work on Datagen Archive Manager, a full-stack enterprise archival platform at Datagen Systems. I developed 12+ FastAPI backend APIs in Python covering authentication, password management, user management and AI Assistant functionality, secured with JWT and bcrypt.",
-      "I automated data archival and conversion workflows for AF, CSV and Parquet formats, integrating IBM Optim Conversion Server and PostgreSQL FDW — processing 500K+ records with zero data loss — and designed and optimized SQL operations across Oracle, MySQL and PostgreSQL.",
+      "Datagen Archive Manager is a full-stack archival product at Datagen Systems. On the backend I wrote 12+ FastAPI endpoints in Python for login, password and user management, and the AI Assistant, using JWT and bcrypt.",
+      "I also automated the archival and conversion jobs for AF, CSV and Parquet files using IBM Optim Conversion Server and PostgreSQL FDW. Those jobs processed 500K+ records with zero data loss. Along the way I wrote and tuned SQL on Oracle, MySQL and PostgreSQL.",
     ],
     problem: [
-      "Enterprise systems accumulate large volumes of historical data. Keeping all of it in production databases increases cost and slows systems down, but the data often still has to be retained and remain accessible.",
-      "Archival workflows move that data out of production systems in a controlled way, while keeping it usable for later access.",
+      "Companies keep years of old data in their production databases. That costs money and slows things down, but they usually can't just delete it.",
+      "Archiving moves that data out of production in a controlled way and keeps it available for later. A lot of it is sensitive, so it often has to be masked too: hidden from people who shouldn't see it, but still usable.",
     ],
     stack: [
       "Python",
@@ -271,15 +271,25 @@ export const projects: Project[] = [
         description: "Installed and configured Red Hat Enterprise Linux, databases and IBM InfoSphere Optim.",
       },
     ],
+    challenges: [
+      {
+        title: "Finding where a multi-step job went wrong",
+        context:
+          "A record passes through several databases, file formats and Optim components before it ends up archived. When a job failed, it wasn't obvious which step was responsible.",
+        approach:
+          "I checked the logs, ran the SQL by hand to validate it, reviewed the configuration, and broke the workflow into smaller steps until I found the root cause.",
+      },
+    ],
     learnings: [
-      "How enterprise archival fits into data retention and database management.",
-      "Working confidently across multiple relational database platforms.",
-      "Operating data tooling on Linux servers and automating repeatable steps.",
+      "How archival fits into data retention and database management.",
+      "Writing SQL for Oracle, MySQL and PostgreSQL in the same project.",
+      "Debugging a long pipeline by splitting it into small steps you can check one at a time.",
+      "Running data tools on Linux servers and scripting the steps I kept repeating.",
     ],
     scopeNote:
       "Built during my internship at Datagen Systems. Client-specific details are intentionally omitted.",
     repoUrl: null,
-    sourceNote: "Internal company codebase — source not publicly available",
+    sourceNote: "Internal company code, so the source isn't public",
   },
   {
     slug: "subscription-tracker-api",
@@ -290,13 +300,13 @@ export const projects: Project[] = [
     category: "Backend · REST API",
     period: "Jun – Jul 2025",
     summary:
-      "A secure REST API for tracking subscriptions — Express.js and MongoDB with JWT authentication, Arcjet rate limiting, bot protection and email validation, and Upstash Redis for background job scheduling.",
+      "A REST API for tracking subscriptions, built with Express.js and MongoDB. It has JWT auth, rate limiting, bot protection and email validation through Arcjet, and background jobs with Upstash Redis.",
     overview: [
-      "A backend service for managing user subscriptions, built with Express.js and MongoDB in a modular architecture and secured with JWT authentication.",
-      "Arcjet protects the API with rate limiting, bot protection and email validation, and Upstash Redis handles background job scheduling and message queues. Endpoints were tested with Postman, covering authentication, input validation and error handling.",
+      "A backend for managing user subscriptions. It's an Express.js and MongoDB app split into modules, with JWT authentication.",
+      "Arcjet handles rate limiting, bot protection and email validation, and Upstash Redis runs the background jobs and message queues. I tested the endpoints with Postman, including auth, input validation and error handling.",
     ],
     problem: [
-      "A public API has to defend itself: authenticate users, reject abusive or automated traffic, validate input, and run time-based work outside the request cycle. The goal was a backend that handles those concerns properly rather than only the happy path.",
+      "Once an API is public, the happy path isn't enough. It has to check who's calling, block abusive or automated traffic, validate input, and run scheduled work outside the request. I wanted to build one that handles all of that.",
     ],
     stack: ["Node.js", "Express.js", "MongoDB", "JWT", "Arcjet", "Upstash Redis", "Postman"],
     features: [
@@ -327,11 +337,11 @@ export const projects: Project[] = [
     ],
     learnings: [
       "Designing a REST API with authentication, validation and consistent error handling.",
-      "Adding a security layer — rate limiting and bot protection — in front of an API.",
+      "Putting rate limiting and bot protection in front of an API.",
       "Moving scheduled work out of the request cycle with background jobs.",
     ],
     repoUrl: null,
-    sourceNote: "Private repository — source not publicly available",
+    sourceNote: "Private repository, so the source isn't public",
   },
   {
     slug: "ai-learning-companion-saas",
@@ -342,13 +352,13 @@ export const projects: Project[] = [
     category: "Full-Stack · AI",
     period: "May – Jun 2025",
     summary:
-      "A SaaS app where users create AI tutors for any subject and learn with them through real-time voice sessions — Next.js server actions over Supabase, Clerk authentication and plan-based billing, Vapi voice AI and Sentry monitoring.",
+      "A SaaS app where you create an AI tutor for any subject and talk to it in real-time voice sessions. Built with Next.js server actions and Supabase, Clerk for auth and billing, Vapi for voice and Sentry for monitoring.",
     overview: [
-      "Users build their own AI learning companions — choosing a subject, topic, voice and speaking style — and then hold live voice conversations with them. The app tracks session history, lets users bookmark companions, and gates features by subscription plan.",
+      "You set up a learning companion by picking a subject, topic, voice and speaking style, then have a live voice conversation with it. The app keeps your session history, lets you bookmark companions, and limits features by plan.",
       "Data access is implemented as Next.js server actions over Supabase, with Clerk providing authentication, the pricing table and plan / feature checks.",
     ],
     problem: [
-      "Learning by talking through a topic is effective, but a human tutor isn't always available. The goal was a self-serve product where anyone can spin up a subject-specific voice tutor, with the account, billing and usage limits a real SaaS needs.",
+      "Talking through a topic is a good way to learn, but you don't always have a tutor around. I wanted a self-serve app where anyone can create a voice tutor for a subject, with the accounts, billing and usage limits a real SaaS needs.",
     ],
     stack: [
       "Next.js",
@@ -391,7 +401,7 @@ export const projects: Project[] = [
     learnings: [
       "Structuring data access as typed server actions with authentication checks on every call.",
       "Enforcing subscription limits on the server rather than trusting the UI.",
-      "Integrating third-party services — auth, billing, voice AI and monitoring — into one coherent product.",
+      "Wiring auth, billing, voice AI and monitoring from different providers into one app.",
     ],
     repoUrl: "https://github.com/MohammedAdnaanJ/AI_SaaS_App",
     // Deployment at https://ai-saa-s-app-ten.vercel.app returned HTTP 500 when checked; add liveUrl once it's fixed.
@@ -405,13 +415,13 @@ export const projects: Project[] = [
     category: "Full-Stack",
     period: "Aug 2025",
     summary:
-      "A Kanban board app with drag-and-drop tasks across columns, persisted ordering, task priorities and due dates, and plan tiers — built with Next.js, Supabase and Clerk.",
+      "A Kanban board with drag-and-drop tasks, saved ordering, priorities, due dates and plan tiers. Built with Next.js, Supabase and Clerk.",
     overview: [
       "Users create boards that start with default To Do, In Progress, Review and Done columns, add and rename columns, and manage tasks with priority, assignee and due date. Tasks can be dragged within and between columns, and the new position is persisted.",
       "A small service layer (board, column and task services) wraps all Supabase queries, and the Supabase client is authenticated with the user's Clerk session token.",
     ],
     problem: [
-      "Drag-and-drop UIs are easy to make look right and hard to make stay right: the order a user sees has to survive a page reload. The goal was a Kanban board where ordering and column membership are stored reliably in the database.",
+      "Drag and drop is easy to make look right and harder to keep right: the order you see has to still be there after a reload. I wanted a board where task order and columns are stored properly in the database.",
     ],
     stack: ["Next.js", "TypeScript", "Supabase", "Clerk", "dnd-kit", "Tailwind CSS", "shadcn/ui"],
     features: [
@@ -517,10 +527,10 @@ export const projects: Project[] = [
     featured: false,
     category: "AI · Backend",
     summary:
-      "A planned, fully local retrieval-augmented generation app for asking questions about your own documents — local LLM inference with Ollama, embeddings with Sentence Transformers and a ChromaDB vector store.",
+      "A planned app for asking questions about your own documents that runs fully locally: Ollama for the LLM, Sentence Transformers for embeddings and ChromaDB for vector search.",
     overview: [
-      "A planned application for querying personal or internal documents with a local language model, so documents never leave the machine.",
-      "This project has not been built yet. The scope and stack below describe the intended design.",
+      "I'm planning this as a way to ask questions about personal or internal documents with a local model, so the documents never leave the machine. It grows out of what I'm learning right now about local LLMs and RAG.",
+      "I haven't built it yet. The scope and stack below are the plan.",
     ],
     problem: [
       "Hosted AI tools are a poor fit for private or sensitive documents. A local pipeline keeps data on the machine while still allowing natural-language questions over it.",
