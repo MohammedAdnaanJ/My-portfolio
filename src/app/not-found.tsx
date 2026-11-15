@@ -1,19 +1,27 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, FolderGit2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { Container } from "@/components/ui/primitives";
+import { ErrorView } from "@/components/layout/error-view";
+
+export const metadata: Metadata = { title: "Page not found", robots: { index: false } };
 
 export default function NotFound() {
   return (
-    <Container className="flex min-h-[60vh] flex-col items-start justify-center py-24">
-      <p className="font-mono text-sm text-primary">404</p>
-      <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Page not found</h1>
-      <p className="mt-3 text-muted-foreground">The page you&apos;re looking for doesn&apos;t exist or has moved.</p>
-      <Link href="/" className={cn(buttonVariants({ variant: "outline" }), "mt-8 h-10 px-4")}>
+    <ErrorView
+      code="404"
+      title="Page not found"
+      description="The page you're looking for doesn't exist or has moved. Check the URL, or head back home."
+    >
+      <Link href="/" className={cn(buttonVariants(), "h-10 px-4")}>
         <ArrowLeft className="size-4" />
         Back to home
       </Link>
-    </Container>
+      <Link href="/projects" className={cn(buttonVariants({ variant: "outline" }), "h-10 px-4")}>
+        <FolderGit2 className="size-4" />
+        View projects
+      </Link>
+    </ErrorView>
   );
 }
