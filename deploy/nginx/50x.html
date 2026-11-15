@@ -1,0 +1,133 @@
+<!doctype html>
+<!--
+  Static fallback served by nginx for 502/503/504 — i.e. when the Next.js app is down or
+  not responding, so it can't render its own error pages. Fully self-contained: no external
+  CSS, JS, fonts or images. Colours mirror the tokens in src/app/globals.css.
+-->
+<html lang="en" class="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Temporarily unavailable · Mohammed Adnaan</title>
+  <script>
+    // Follow the theme chosen on the site (next-themes stores it under "theme"); dark by default.
+    try {
+      var t = localStorage.getItem("theme");
+      if (t === "system") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      if (t === "light") document.documentElement.className = "";
+    } catch (e) {}
+  </script>
+  <style>
+    :root {
+      --background: oklch(0.985 0.002 270);
+      --foreground: oklch(0.2 0.012 270);
+      --primary: oklch(0.5 0.19 275);
+      --primary-foreground: oklch(0.99 0 0);
+      --muted: oklch(0.955 0.004 270);
+      --muted-foreground: oklch(0.47 0.015 270);
+      --border: oklch(0.2 0.012 270 / 10%);
+      --ring: oklch(0.5 0.19 275 / 60%);
+      color-scheme: light;
+    }
+    .dark {
+      --background: oklch(0.155 0.006 270);
+      --foreground: oklch(0.955 0.004 270);
+      --primary: oklch(0.74 0.13 275);
+      --primary-foreground: oklch(0.16 0.02 275);
+      --muted: oklch(0.21 0.007 270);
+      --muted-foreground: oklch(0.71 0.012 270);
+      --border: oklch(1 0 0 / 8%);
+      --ring: oklch(0.74 0.13 275 / 60%);
+      color-scheme: dark;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      background: var(--background);
+      color: var(--foreground);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .mono { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; }
+    header { border-bottom: 1px solid var(--border); }
+    .container { width: 100%; max-width: 72rem; margin: 0 auto; padding: 0 1rem; }
+    @media (min-width: 640px) { .container { padding: 0 1.5rem; } }
+    @media (min-width: 1024px) { .container { padding: 0 2rem; } }
+    .brand { display: flex; align-items: center; gap: 0.75rem; height: 4rem; font-weight: 600; letter-spacing: -0.01em; }
+    .logo {
+      display: grid; place-items: center; width: 2rem; height: 2rem;
+      border: 1px solid var(--border); border-radius: 0.5rem;
+      color: var(--primary); font-size: 0.75rem; font-weight: 700;
+    }
+    main { flex: 1; display: flex; align-items: center; }
+    main .container { padding-top: 6rem; padding-bottom: 6rem; }
+    .code {
+      margin: 0; font-size: 4.5rem; line-height: 1; font-weight: 600; letter-spacing: -0.05em;
+      color: color-mix(in oklch, var(--primary) 15%, transparent); user-select: none;
+    }
+    @media (min-width: 640px) { .code { font-size: 6rem; } }
+    .eyebrow { margin: 1rem 0 0; font-size: 0.875rem; color: var(--primary); }
+    h1 { margin: 0.5rem 0 0; font-size: 1.875rem; line-height: 1.2; font-weight: 600; letter-spacing: -0.025em; text-wrap: balance; }
+    @media (min-width: 640px) { h1 { font-size: 2.25rem; } }
+    p.lead { margin: 0.75rem 0 0; max-width: 36rem; line-height: 1.625; color: var(--muted-foreground); text-wrap: pretty; }
+    .actions { margin-top: 2rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.375rem; height: 2.5rem; padding: 0 1rem;
+      border-radius: 0.625rem; border: 1px solid transparent; font: inherit; font-size: 0.875rem; font-weight: 500;
+      text-decoration: none; cursor: pointer; transition: background-color 0.15s, border-color 0.15s;
+    }
+    .btn svg { width: 1rem; height: 1rem; flex-shrink: 0; }
+    .btn-primary { background: var(--primary); color: var(--primary-foreground); }
+    .btn-primary:hover { background: color-mix(in oklch, var(--primary) 80%, transparent); }
+    .btn-outline { border-color: var(--border); background: transparent; color: var(--foreground); }
+    .btn-outline:hover { background: var(--muted); }
+    :focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+    .note { margin: 1.5rem 0 0; font-size: 0.75rem; color: var(--muted-foreground); }
+    .note a { color: inherit; text-underline-offset: 3px; }
+    .note a:hover { color: var(--foreground); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container brand">
+      <span class="logo mono" aria-hidden="true">MA</span>
+      <span>Mohammed Adnaan</span>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="container">
+      <p class="code mono" aria-hidden="true">50x</p>
+      <p class="eyebrow mono">Service unavailable</p>
+      <h1>Temporarily unavailable</h1>
+      <p class="lead">
+        The site is down for a moment, either for maintenance or because something went wrong on the server.
+        Please try again in a minute.
+      </p>
+      <div class="actions">
+        <button type="button" class="btn btn-primary" onclick="location.reload()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/>
+          </svg>
+          Try again
+        </button>
+        <a class="btn btn-outline" href="/">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
+          </svg>
+          Back to home
+        </a>
+      </div>
+      <p class="note">
+        Need to reach me now? Email
+        <a href="mailto:mohamedadnan081@gmail.com">mohamedadnan081@gmail.com</a>
+        or find me on <a href="https://www.linkedin.com/in/mohammedadnaan14" rel="noopener">LinkedIn</a>.
+      </p>
+    </div>
+  </main>
+</body>
+</html>
